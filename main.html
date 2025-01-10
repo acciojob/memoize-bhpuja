@@ -1,16 +1,66 @@
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en">
 <head>
-	<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memoize Function</title>
 </head>
-
 <body>
-	<!-- the entire body must be written by student -->
-    <script type="text/javascript" src="./script.js">
-</script>
+  <h1>Memoize Function Example</h1>
+  <script>
+    // Memoize function implementation
+    function memoize(callback, resolver) {
+      const cache = new Map();
 
+      function memoized(...args) {
+        const key = resolver ? resolver(...args) : JSON.stringify(args);
+        if (cache.has(key)) {
+          return cache.get(key);
+        }
+        const result = callback(...args);
+        cache.set(key, result);
+        return result;
+      }
+
+      // Clear the cache
+      memoized.clear = function () {
+        cache.clear();
+      };
+
+      // Delete a specific cache entry
+      memoized.delete = function (...args) {
+        const key = resolver ? resolver(...args) : JSON.stringify(args);
+        return cache.delete(key);
+      };
+
+      // Check if a cache entry exists
+      memoized.has = function (...args) {
+        const key = resolver ? resolver(...args) : JSON.stringify(args);
+        return cache.has(key);
+      };
+
+      return memoized;
+    }
+
+    // Sample Usage
+
+    // Example without resolver
+    const callback = (...args) => args;
+    const memoized = memoize(callback);
+    console.log(memoized(123)); // Calls callback, returns 123
+    console.log(memoized(123)); // Returns cached value, 123
+    console.log(memoized(123, "abc")); // Calls callback, returns [123, 'abc']
+    console.log(memoized.has(123)); // true
+    memoized.delete(123);
+    console.log(memoized.has(123)); // false
+
+    // Example with resolver
+    const memoizedWithResolver = memoize(callback, args => args[0]);
+    console.log(memoizedWithResolver(123)); // Calls callback, returns 123
+    console.log(memoizedWithResolver(123)); // Returns cached value, 123
+    console.log(memoizedWithResolver(123, "abc")); // Returns cached value for key 123, 123
+    console.log(memoizedWithResolver("abc", 123)); // Calls callback, returns ['abc', 123]
+    console.log(memoizedWithResolver("abc")); // Returns cached value for key 'abc', ['abc', 123]
+  </script>
 </body>
-
 </html>
